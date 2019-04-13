@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import sys
 
-def convert(csv_path, output_path, mode):
+def convert(df, mode):
     if mode == 'gt':
         bbox_field = 'annotations'
     elif mode == 'hyp':
@@ -11,7 +11,6 @@ def convert(csv_path, output_path, mode):
     else:
         print("Please use mode 'gt' or 'hyp'.")
         sys.exit(1)
-    df = pd.read_csv(csv_path)
     entries = []
     for filename in sorted(np.unique(df['filename'])):
         file_df = df[df['filename'] == filename]
@@ -33,10 +32,12 @@ def convert(csv_path, output_path, mode):
             bbox_entries.append(bbox_entry)
         entry = {'frames': bbox_entries, 'class': 'video', 'filename': filename}
         entries.append(entry)
-    json.dump(entries, open(output_path, 'w'))
+    return entries
 
 if __name__ == '__main__':
     csv_path = sys.argv[1]
     output_path = sys.argv[2] 
     mode = sys.argv[3]
-    convert(csv_path, output_path, mode)
+    df = pd.read_csv(csv_path)
+    entries = convert(df, mode)
+    json.dump(entries, open(output_path, 'w'))
